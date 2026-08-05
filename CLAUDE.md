@@ -5,7 +5,8 @@ Este directorio contiene una **guía digital** para los huéspedes del apartamen
 
 ## Contexto
 - Propietario / gestor: apartamentosreyescatolicos@gmail.com
-- Repositorio remoto: https://github.com/apartamentosreyescatolicos-max/guia-digital (privado)
+- Repositorio remoto: https://github.com/apartamentosreyescatolicos-max/guia-14a
+- Publicado con GitHub Pages en: https://apartamentosreyescatolicos-max.github.io/guia-14a/
 - El repo contiene exclusivamente la guía del apartamento 14-A.
 
 ## Convenciones
