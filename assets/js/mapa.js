@@ -80,7 +80,32 @@
   });
 
   Object.values(layers).forEach(g => g.addTo(map));
-  map.fitBounds(allBounds, { padding: [30, 30] });
+
+  // El contenedor nace oculto (pantalla "Qué ver" cerrada) y con tamaño
+  // cero, así que fitBounds/flyToBounds no pueden calcular un encuadre
+  // válido y Leaflet lanza "Invalid LatLng (NaN, NaN)". Estas funciones
+  // comprueban el tamaño real antes de encuadrar; el encuadre correcto
+  // se aplica más tarde, cuando app.js llama a invalidateSize() al
+  // mostrar la pantalla.
+  function hasValidSize() {
+    const size = map.getSize();
+    return size.x > 0 && size.y > 0;
+  }
+  function safeFitBounds(bounds, opts) {
+    if (!bounds.isValid() || !hasValidSize()) return;
+    map.fitBounds(bounds, opts);
+  }
+  function safeFlyToBounds(bounds, opts) {
+    if (!bounds.isValid() || !hasValidSize()) return;
+    map.flyToBounds(bounds, opts);
+  }
+
+  safeFitBounds(allBounds, { padding: [30, 30], maxZoom: 16 });
+
+  // El contenedor nace oculto (la pantalla "Qué ver" empieza cerrada),
+  // así que Leaflet lo mide con tamaño 0. Exponemos el mapa para que
+  // app.js pueda recalcular tamaño y encuadre al mostrar la pantalla.
+  window.__mapaGranada = { map, allBounds };
 
   // ----- Filtros por categoría -----
   const buttons = document.querySelectorAll('.mapa-leyenda__btn[data-cat]');
@@ -108,9 +133,9 @@
     if (activeCat) {
       const b = L.latLngBounds([]);
       PLACES.filter(p => p.cat === activeCat).forEach(p => b.extend([p.lat, p.lon]));
-      if (b.isValid()) map.flyToBounds(b, { padding: [40, 40], maxZoom: 16, duration: 0.6 });
+      safeFlyToBounds(b, { padding: [40, 40], maxZoom: 16, duration: 0.6 });
     } else {
-      map.flyToBounds(allBounds, { padding: [30, 30], duration: 0.6 });
+      safeFlyToBounds(allBounds, { padding: [30, 30], maxZoom: 16, duration: 0.6 });
     }
   }
 
@@ -127,4 +152,71 @@
   });
 
   applyFilter();
+})();
+
+/* =========================================================
+   Mapa de Parkings: apartamento + 5 parkings del centro
+   ========================================================= */
+(function () {
+  if (typeof L === 'undefined') return;
+
+  const POINTS = [
+    { type: "home",    emoji: "🏠", name: "Tu apartamento · Plaza de Cuchilleros 14", lat: 37.1784, lon: -3.5928, q: "Plaza de Cuchilleros 14 Granada" },
+    { type: "parking", emoji: "🅿️", name: "Parking San Agustín",                      lat: 37.1774, lon: -3.5978, q: "Parking San Agustín Granada" },
+    { type: "parking", emoji: "🅿️", name: "Parking APK2 Puerta Real",                 lat: 37.1733, lon: -3.5978, q: "Parking APK2 Puerta Real Granada" },
+    { type: "parking", emoji: "🅿️", name: "Parking Hermanos Maristas",                lat: 37.1754, lon: -3.6015, q: "Parking Hermanos Maristas Granada" },
+    { type: "parking", emoji: "🅿️", name: "Parking Torres Neptuno",                   lat: 37.1650, lon: -3.6040, q: "Parking Torres Neptuno Granada" },
+    { type: "parking", emoji: "🅿️", name: "Parking San Lázaro · Plaza de Toros",      lat: 37.1830, lon: -3.6100, q: "Parking San Lázaro Plaza de Toros Granada" },
+  ];
+
+  const COLORS = { home: "#B5573E", parking: "#4F6E72" };
+
+  const el = document.getElementById('mapa-parkings');
+  if (!el) return;
+
+  const map = L.map(el, {
+    scrollWheelZoom: false,
+    zoomControl: true,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  const allBounds = L.latLngBounds([]);
+  POINTS.forEach(p => {
+    const color = COLORS[p.type];
+    const icon = L.divIcon({
+      className: 'mapa-pin',
+      html: `<span class="mapa-pin__dot" style="background:${color}"><span class="mapa-pin__emoji">${p.emoji}</span></span>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+      popupAnchor: [0, -16],
+    });
+    const marker = L.marker([p.lat, p.lon], { icon }).addTo(map);
+    const url = 'https://maps.google.com/?q=' + encodeURIComponent(p.q);
+    marker.bindPopup(
+      `<div class="mapa-popup">
+         <strong>${p.name}</strong>
+         <a href="${url}" target="_blank" rel="noopener">Abrir en Google Maps →</a>
+       </div>`
+    );
+    allBounds.extend([p.lat, p.lon]);
+  });
+
+  // Mismo problema que el mapa de "Qué ver": el contenedor nace oculto
+  // (pantalla "Parkings" cerrada) con tamaño 0, así que fitBounds no
+  // puede calcular un encuadre válido todavía. app.js llama a
+  // invalidateSize() + fitBounds() cuando la pantalla se muestra.
+  function hasValidSize() {
+    const size = map.getSize();
+    return size.x > 0 && size.y > 0;
+  }
+  if (allBounds.isValid() && hasValidSize()) {
+    map.fitBounds(allBounds, { padding: [30, 30], maxZoom: 16 });
+  }
+
+  window.__mapaParkings = { map, allBounds };
 })();

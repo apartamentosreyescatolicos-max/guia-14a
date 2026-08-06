@@ -38,109 +38,134 @@
     b.addEventListener('click', copyWifi);
   });
 
-  /* ---------- Copiar código de descuento ---------- */
-  document.querySelectorAll('[data-action="copy-code"]').forEach(el => {
-    el.addEventListener('click', () => {
-      const code = document.getElementById('promo-code')?.textContent?.trim() || '';
-      if (!code) return;
-      navigator.clipboard?.writeText(code).then(
-        () => showToast(getI18n('toast.code') || '✓ Código copiado'),
-        () => showToast('No se pudo copiar')
-      );
-    });
+  /* ---------- Descuento: botón igual a los demás, que abre un modal
+     por encima de todo el menú (no empuja ni reordena el resto). ---------- */
+  const promoToggle = document.getElementById('btn-promo-toggle');
+  const promoModal = document.getElementById('promo-modal');
+  function openPromo() { promoModal.hidden = false; }
+  function closePromo() { promoModal.hidden = true; }
+  promoToggle?.addEventListener('click', openPromo);
+  promoModal?.querySelectorAll('[data-promo-close]').forEach(el => {
+    el.addEventListener('click', closePromo);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && promoModal && !promoModal.hidden) closePromo();
   });
 
-  /* ---------- Bottom nav: marcar sección activa ---------- */
-  const navLinks = document.querySelectorAll('.bottom-nav a');
-  const sections = ['inicio', 'estancia', 'experiencias', 'comer', 'ver', 'contacto']
-    .map(id => document.getElementById(id))
-    .filter(Boolean);
+  /* ---------- Navegación del menú (hub) ---------- */
+  const menuScreen = document.getElementById('screen-menu');
+  const detailScreens = document.querySelectorAll('.detail-screen');
 
-  const setActive = (id) => {
-    navLinks.forEach(a => a.classList.toggle('is-active', a.dataset.target === id));
-  };
-
-  let suppressUntil = 0;
-
-  if (sections.length) {
-    /* Selecciona la sección que contiene la franja del 30% del viewport.
-       Si ninguna la contiene, usa la última cuyo top esté por encima. */
-    const updateActive = () => {
-      if (Date.now() < suppressUntil) return;
-      const probe = window.innerHeight * 0.30;
-      let containing = null;
-      let lastAbove = sections[0];
-      for (const s of sections) {
-        const rect = s.getBoundingClientRect();
-        if (rect.top <= probe && rect.bottom > probe) containing = s;
-        if (rect.top <= probe) lastAbove = s;
-      }
-      const current = containing || lastAbove;
-      if (current) setActive(current.id);
-    };
-    updateActive();
-    window.addEventListener('scroll', updateActive, { passive: true });
-    window.addEventListener('resize', updateActive);
-    /* El iframe de Civitatis se redimensiona después de cargar — recalculamos */
-    document.querySelectorAll('.civitatis-iframe').forEach(f => {
-      f.addEventListener('load', () => setTimeout(updateActive, 200));
-    });
-  }
-
-  /* Resaltado inmediato al tocar un ítem del dock — y bloquear que el
-     scroll-handler lo quite durante el smooth-scroll */
-  navLinks.forEach(a => {
-    a.addEventListener('click', () => {
-      const id = a.dataset.target;
-      if (!id) return;
-      setActive(id);
-      suppressUntil = Date.now() + 900;
-    });
+  // La entrada en cascada de los botones del menú (ver hubBtnPop en el
+  // CSS) usa "animation-fill-mode: both" para que cada botón se quede
+  // en su posición final al terminar. Si no la quitáramos, esa mismo
+  // "transform" seguiría bloqueado por la animación para siempre y los
+  // efectos :hover/:active (que también animan transform) dejarían de
+  // notarse. En cuanto cada botón termina su entrada, le limpiamos la
+  // animación para devolverle el control normal del hover.
+  document.querySelector('.hub-grid')?.addEventListener('animationend', e => {
+    if (e.target.parentElement?.classList.contains('hub-grid')) {
+      e.target.style.animation = 'none';
+    }
   });
 
-  /* ---------- Reveal on scroll ---------- */
-  if ('IntersectionObserver' in window) {
-    const revealTargets = document.querySelectorAll(
-      '.section, .card, .place, .move, .rules li'
-    );
-    const revealer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            revealer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-    );
-    revealTargets.forEach(el => revealer.observe(el));
-  } else {
-    document.querySelectorAll('.section, .card, .place, .move, .rules li')
+  function showScreen(name) {
+    const target = name === 'menu' ? menuScreen : document.getElementById('screen-' + name);
+    if (!target) return;
+
+    menuScreen.hidden = target !== menuScreen;
+    detailScreens.forEach(s => { s.hidden = s !== target; });
+
+    // Varios componentes (heredados de la guía original, pensada para un
+    // scroll largo) solo se revelan al recibir la clase "is-visible" —
+    // antes la ponía un IntersectionObserver al hacer scroll. Aquí cada
+    // pantalla aparece entera de golpe, así que se la damos directamente
+    // en cuanto se muestra, sin esperar a ningún scroll.
+    target.querySelectorAll('.card, .place')
       .forEach(el => el.classList.add('is-visible'));
+
+    window.scrollTo(0, 0);
+
+    // Los mapas de Leaflet se crean con su contenedor oculto (tamaño 0);
+    // al mostrar la pantalla correspondiente hay que recalcular tamaño y
+    // encuadre. Un setTimeout fijo no siempre basta: si el navegador aún
+    // no ha terminado de aplicar el "display: none -> block" cuando se
+    // dispara, invalidateSize() mide 0x0, fitBounds() no tiene área real
+    // sobre la que encajar y Leaflet acaba metiendo un zoom absurdo
+    // (edificio a edificio, con un único tile cargado y todo lo demás en
+    // gris — justo el "mapa que no carga" reportado). Por eso reintenta
+    // hasta que el contenedor tenga tamaño real antes de encajar.
+    function fitMapWhenVisible(mapInfo, attemptsLeft) {
+      if (!mapInfo) return;
+      // Nada de requestAnimationFrame aquí: en una pestaña que no está
+      // en primer plano el navegador puede posponerlo indefinidamente,
+      // dejando el mapa sin encuadrar. setTimeout sí se ejecuta siempre.
+      setTimeout(() => {
+        // map.getSize() de Leaflet cachea el tamaño y, si la primera
+        // medición se hizo con el contenedor a 0x0, puede quedarse
+        // "pegado" ahí aunque el div ya tenga tamaño real. Medimos el
+        // propio elemento del DOM (sin caché) para decidir si ya es
+        // seguro encajar el mapa.
+        const container = mapInfo.map.getContainer();
+        if ((container.clientWidth === 0 || container.clientHeight === 0) && attemptsLeft > 0) {
+          fitMapWhenVisible(mapInfo, attemptsLeft - 1);
+          return;
+        }
+        // Fuerza a Leaflet a remedir de cero: si su caché interna de
+        // tamaño se quedó a 0x0 de cuando el contenedor nació oculto,
+        // invalidateSize() por sí solo no siempre la limpia.
+        mapInfo.map._size = null;
+        mapInfo.map.invalidateSize();
+        mapInfo.map.fitBounds(mapInfo.allBounds, { padding: [30, 30], maxZoom: 16 });
+      }, 100);
+    }
+
+    if (name === 'ver' && window.__mapaGranada) {
+      fitMapWhenVisible(window.__mapaGranada, 10);
+    }
+    if (name === 'parkings' && window.__mapaParkings) {
+      fitMapWhenVisible(window.__mapaParkings, 10);
+    }
   }
+
+  document.querySelectorAll('[data-target]').forEach(btn => {
+    btn.addEventListener('click', () => showScreen(btn.dataset.target));
+  });
+
+  document.querySelectorAll('[data-back]').forEach(btn => {
+    btn.addEventListener('click', () => showScreen('menu'));
+  });
 
   /* ---------- i18n (ES / EN) ---------- */
   const I18N = {
     es: {
       'toast.wifi': '✓ Contraseña copiada al portapapeles',
-      'toast.code': '✓ Código copiado al portapapeles',
-      'hero.guide': 'Guía',
-      'quick.wifi': 'Wi-Fi',
-      'quick.promo': '−10% reserva',
-      'quick.map': 'Cómo llegar',
+      'hub.changeLang': '‹ Cambiar idioma',
+      'hub.checkinout': 'Check-in / Check-out',
+      'hub.maletas': 'Consigna',
+      'hub.normas': 'Normas de la casa',
+      'hub.casa': 'Cómo funciona la casa',
+      'hub.llegar': 'Cómo llegar',
+      'hub.moverse': 'Cómo moverte',
+      'hub.parkings': 'Parkings',
+      'hub.comer': 'Dónde comer',
+      'hub.ver': 'Qué ver',
+      'hub.experiencias': 'Experiencias',
+      'hub.contacto': 'Contacto',
+      'hub.promo': 'Descuento −10%',
       'stay.kicker': 'Tu estancia',
       'stay.title': 'Lo esencial',
       'stay.checkin.title': 'Entrada',
       'stay.checkin.small': 'A partir de las tres de la tarde',
       'stay.checkout.title': 'Salida',
       'stay.checkout.small': 'Antes de las once de la mañana',
+      'stay.earlylate': '¿Necesitas entrar antes o salir más tarde? Escríbenos directamente por <a href="https://wa.me/34680251473" target="_blank" rel="noopener">WhatsApp</a> y lo vemos contigo.',
       'stay.wifi.network': 'Red',
       'stay.wifi.pass': 'Contraseña',
       'stay.wifi.copy': 'Copiar contraseña',
-      'stay.locker.title': 'Servicio de consigna',
-      'stay.locker.small': '3,50 € por pieza en <strong>Artesanías Medina</strong>, Calle Reyes Católicos 54. Abierto todos los días de 10:00 a 21:00.',
-      'stay.locker.cta': 'Ver en mapa',
+      'stay.locker.priceNote': 'por pieza, sea cual sea su tamaño',
+      'stay.locker.text': 'Si necesitas guardar el equipaje antes del check-in o después del check-out, tienes a tu disposición un servicio de consigna en <strong>Artesanías Medina</strong>, en Calle Reyes Católicos 54 — a solo unos minutos andando del apartamento. Puedes dejar tus maletas por 3,50 € por pieza, sea cual sea su tamaño. La tienda abre todos los días del año, de 10:00 a 21:00, excepto el 1 de enero.',
+      'stay.locker.cta': 'Ver en Google Maps',
       'rules.kicker': 'Para una estancia perfecta',
       'rules.title': 'Normas de la casa',
       'rules.lead': 'Estas pequeñas reglas hacen que todo el mundo disfrute por igual.',
@@ -216,8 +241,6 @@
       'move.bus.d': '<p class="move__lead">Las líneas turísticas C suben al Albaicín, Sacromonte y la Alhambra — perfectas para evitar las cuestas.</p><ul class="bus-lines"><li><span class="bus-chip">C30</span><span class="bus-route">Plaza Isabel la Católica ↔ Alhambra</span><span class="bus-freq">~12 min</span></li><li><span class="bus-chip">C31</span><span class="bus-route">Plaza Nueva ↔ Albaicín (Mirador de San Nicolás)</span><span class="bus-freq">~12 min</span></li><li><span class="bus-chip">C32</span><span class="bus-route">Alhambra ↔ Albaicín, sin pasar por el centro</span><span class="bus-freq">~10 min</span></li><li><span class="bus-chip">C34</span><span class="bus-route">Plaza Nueva ↔ Sacromonte y Albaicín bajo</span><span class="bus-freq">~20 min</span></li></ul><p class="move__foot"><strong>1,60 €</strong> al conductor (efectivo o tarjeta) · 07:00–23:00 aprox.</p>',
       'move.taxi.t': 'Taxi',
       'move.taxi.d': 'Hay paradas cerca, en Reyes Católicos y Plaza Nueva. Para pedirlo:',
-      'move.car.t': 'En coche',
-      'move.car.d': '<p class="move__lead">Por favor, consulta nuestra guía para acceder en coche hasta tu apartamento.</p><a class="move__cta" href="https://docs.google.com/document/d/1WIaZ-JhH2RYIeVjacKRR0F-NOTMo5k9arXoXegqyKNU/edit?usp=sharing" target="_blank" rel="noopener"><span>Guía de acceso y aparcamiento</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>',
       'move.transit.t': 'Estaciones y aeropuerto',
       'move.transit.bus': 'Estación de autobuses',
       'move.transit.train': 'Estación de tren',
@@ -226,6 +249,10 @@
       'move.luggage.t': '¿Necesitas dejar el equipaje?',
       'move.luggage.hours': 'Abierto todos los días de 10:00 a 21:00.',
       'move.luggage.price': '3,5 € por maleta, sea del tamaño que sea.',
+      'parkings.kicker': 'En coche',
+      'parkings.title': 'Parkings en el centro',
+      'parkings.intro': 'El centro histórico es zona de acceso restringido. Por favor, envíanos por <a href="https://wa.me/34680251473" target="_blank" rel="noopener">WhatsApp</a> la matrícula del coche con el que vienes, para poder autorizar tu entrada y evitar que te multen.',
+      'parkings.mapIntro': 'Pulsa cualquier marcador para abrirlo en Google Maps.',
       'contact.kicker': 'Estamos aquí para ti',
       'contact.title': 'Contactos importantes',
       'contact.host': 'Tu anfitrión, 24h',
@@ -238,38 +265,37 @@
       'contact.health': 'Urgencias Hospital',
       'contact.bus': 'Estación de Autobuses',
       'contact.train': 'Estación de Tren',
-      'promo.kicker': 'Descuento para tu próxima visita',
-      'promo.note': 'Usa el código <strong id="promo-code">ARC10</strong> en tu próxima reserva',
-      'footer.quote': '«Dale limosna, mujer, que no hay en la vida nada como la pena de ser ciego en Granada.»',
-      'footer.quoteAuthor': '— Francisco A. de Icaza',
-      'footer.sign': 'Apartamentos Reyes Católicos · Plaza de Cuchilleros · Granada',
-      'footer.bye': '¡Esperamos que tu estancia sea inolvidable!',
-      'nav.home': 'Inicio',
-      'nav.stay': 'Casa',
-      'nav.exp': 'Vivir',
-      'nav.eat': 'Comer',
-      'nav.see': 'Ver',
-      'nav.contact': 'Contacto'
+      'promo.expandText': 'Tienes un 10% de descuento si utilizas el código <strong>ARC10</strong> reservando directamente en nuestra web.',
+      'promo.expandCta': 'Reservar en nuestra web →'
     },
     en: {
       'toast.wifi': '✓ Password copied to clipboard',
-      'toast.code': '✓ Code copied to clipboard',
-      'hero.guide': 'Guide',
-      'quick.wifi': 'Wi-Fi',
-      'quick.promo': '−10% booking',
-      'quick.map': 'Get there',
+      'hub.changeLang': '‹ Change language',
+      'hub.checkinout': 'Check-in / Check-out',
+      'hub.maletas': 'Locker',
+      'hub.normas': 'House rules',
+      'hub.casa': 'How the house works',
+      'hub.llegar': 'How to get here',
+      'hub.moverse': 'Getting around',
+      'hub.parkings': 'Parking',
+      'hub.comer': 'Where to eat',
+      'hub.ver': 'What to see',
+      'hub.experiencias': 'Experiences',
+      'hub.contacto': 'Contact',
+      'hub.promo': 'Discount −10%',
       'stay.kicker': 'Your stay',
       'stay.title': 'The essentials',
       'stay.checkin.title': 'Check-in',
       'stay.checkin.small': 'From three in the afternoon',
       'stay.checkout.title': 'Check-out',
       'stay.checkout.small': 'Before eleven in the morning',
+      'stay.earlylate': 'Need to check in earlier or check out later? Message us directly on <a href="https://wa.me/34680251473" target="_blank" rel="noopener">WhatsApp</a> and we\'ll sort it out with you.',
       'stay.wifi.network': 'Network',
       'stay.wifi.pass': 'Password',
       'stay.wifi.copy': 'Copy password',
-      'stay.locker.title': 'Luggage storage',
-      'stay.locker.small': '€3.50 per piece at <strong>Artesanías Medina</strong>, Calle Reyes Católicos 54. Open every day 10:00–21:00.',
-      'stay.locker.cta': 'Open in map',
+      'stay.locker.priceNote': 'per piece, whatever its size',
+      'stay.locker.text': 'If you need to store your luggage before check-in or after check-out, you can use the luggage storage service at <strong>Artesanías Medina</strong>, Calle Reyes Católicos 54 — just a few minutes\' walk from the apartment. You can leave your bags for €3.50 per piece, whatever the size. The shop is open every day of the year, 10:00–21:00, except January 1st.',
+      'stay.locker.cta': 'Open in Google Maps',
       'rules.kicker': 'For a perfect stay',
       'rules.title': 'House rules',
       'rules.lead': 'These small rules make sure everyone enjoys their stay equally.',
@@ -345,8 +371,6 @@
       'move.bus.d': '<p class="move__lead">The tourist C lines climb up to the Albaicín, Sacromonte and the Alhambra — great to skip the slopes.</p><ul class="bus-lines"><li><span class="bus-chip">C30</span><span class="bus-route">Plaza Isabel la Católica ↔ Alhambra</span><span class="bus-freq">~12 min</span></li><li><span class="bus-chip">C31</span><span class="bus-route">Plaza Nueva ↔ Albaicín (Mirador de San Nicolás)</span><span class="bus-freq">~12 min</span></li><li><span class="bus-chip">C32</span><span class="bus-route">Alhambra ↔ Albaicín, bypassing the centre</span><span class="bus-freq">~10 min</span></li><li><span class="bus-chip">C34</span><span class="bus-route">Plaza Nueva ↔ Sacromonte and lower Albaicín</span><span class="bus-freq">~20 min</span></li></ul><p class="move__foot"><strong>€1.60</strong> on board (cash or card) · approx. 07:00–23:00.</p>',
       'move.taxi.t': 'Taxi',
       'move.taxi.d': 'There are taxi ranks nearby on Reyes Católicos and Plaza Nueva. To order one:',
-      'move.car.t': 'By car',
-      'move.car.d': '<p class="move__lead">Please check our guide to drive to your apartment.</p><a class="move__cta" href="https://docs.google.com/document/d/1EUm2fdiSxdZnFCLXpA0ZX9ppWVYmubLQv0Rh5sp5Fu8/edit?usp=sharing" target="_blank" rel="noopener"><span>Driving & parking guide</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>',
       'move.transit.t': 'Stations and airport',
       'move.transit.bus': 'Bus station',
       'move.transit.train': 'Train station',
@@ -355,6 +379,10 @@
       'move.luggage.t': 'Need to leave your luggage?',
       'move.luggage.hours': 'Open every day from 10:00 to 21:00.',
       'move.luggage.price': '€3.50 per suitcase, any size.',
+      'parkings.kicker': 'By car',
+      'parkings.title': 'Parking in the centre',
+      'parkings.intro': 'The historic centre has restricted vehicle access. Please send us the number plate of the car you\'re arriving in via <a href="https://wa.me/34680251473" target="_blank" rel="noopener">WhatsApp</a>, so we can authorise your entry and avoid a fine.',
+      'parkings.mapIntro': 'Tap any marker to open it in Google Maps.',
       'contact.kicker': 'We\'re here for you',
       'contact.title': 'Important contacts',
       'contact.host': 'Your host, 24h',
@@ -367,18 +395,8 @@
       'contact.health': 'Hospital A&E',
       'contact.bus': 'Bus Station',
       'contact.train': 'Train Station',
-      'promo.kicker': 'Discount for your next visit',
-      'promo.note': 'Use the code <strong id="promo-code">ARC10</strong> on your next booking',
-      'footer.quote': '«Give him alms, woman, for there is nothing in life like the sorrow of being blind in Granada.»',
-      'footer.quoteAuthor': '— Francisco A. de Icaza',
-      'footer.sign': 'Apartamentos Reyes Católicos · Plaza de Cuchilleros · Granada',
-      'footer.bye': 'We hope your stay is unforgettable!',
-      'nav.home': 'Home',
-      'nav.stay': 'Home',
-      'nav.exp': 'Live',
-      'nav.eat': 'Eat',
-      'nav.see': 'See',
-      'nav.contact': 'Contact'
+      'promo.expandText': 'Enjoy 10% off when you use the code <strong>ARC10</strong> booking directly on our website.',
+      'promo.expandCta': 'Book on our website →'
     }
   };
 
@@ -396,22 +414,89 @@
       if (value !== undefined) el.innerHTML = value;
     });
 
-    document.querySelectorAll('[data-lang]').forEach(b => {
-      const isActive = b.dataset.lang === lang;
-      b.classList.toggle('is-active', isActive);
-      b.setAttribute('aria-pressed', String(isActive));
-    });
-
-    try { localStorage.setItem('guia14a.lang', lang); } catch (_) {}
+    // El botón "Cómo llegar" lleva a la guía de acceso ya en el mismo
+    // idioma elegido aquí, saltándose su propia pantalla de idioma.
+    const comoLlegarLink = document.getElementById('link-como-llegar');
+    if (comoLlegarLink) {
+      comoLlegarLink.href = 'https://apartamentosreyescatolicos-max.github.io/guia-como-llegar/?lang=' + lang + '&from=' + encodeURIComponent(location.href);
+    }
   }
 
-  document.querySelectorAll('[data-lang]').forEach(b => {
-    b.addEventListener('click', () => applyLang(b.dataset.lang));
+  applyLang('es');
+
+  /* ---------- Asistente: splash → idioma → menú ---------- */
+  const stage = document.getElementById('stage');
+  const stageScreens = {
+    splash: document.getElementById('screen-splash'),
+    lang: document.getElementById('screen-lang')
+  };
+  let currentStageScreen = 'splash';
+  const STAGE_MS = 900; // debe coincidir con la duración del fundido en CSS
+
+  function bringToFront(screen) {
+    stageScreens.splash.style.zIndex = '1';
+    stageScreens.lang.style.zIndex = '1';
+    screen.style.zIndex = '2';
+  }
+
+  function revealLang() {
+    // La pantalla de idioma ya está lista y visible por debajo, sin
+    // animación propia; solo el splash que la tapa se difumina encima.
+    // Así no hay ningún hueco entre medias, solo un fundido continuo.
+    const splash = stageScreens.splash;
+    const lang = stageScreens.lang;
+    bringToFront(splash);
+    lang.hidden = false;
+    splash.classList.add('is-hidden');
+    setTimeout(() => {
+      splash.hidden = true;
+    }, STAGE_MS);
+    currentStageScreen = 'lang';
+  }
+
+  function enterMenu() {
+    // El menú se revela YA por debajo (el escenario aún lo tapa) y es
+    // el escenario entero el que se difumina como una sola pieza sobre
+    // él, para que sea un fundido continuo y no un corte seguido de
+    // otra animación distinta.
+    document.body.classList.remove('is-wizard');
+    menuScreen.hidden = false;
+    stage.classList.add('is-fading');
+    setTimeout(() => {
+      stage.hidden = true;
+      stage.classList.remove('is-fading');
+    }, STAGE_MS);
+  }
+
+  function backToLang() {
+    document.body.classList.add('is-wizard');
+    bringToFront(stageScreens.lang);
+    stage.classList.add('is-fading');
+    stage.hidden = false;
+    void stage.offsetWidth;
+    stage.classList.remove('is-fading');
+    setTimeout(() => {
+      menuScreen.hidden = true;
+    }, STAGE_MS);
+    currentStageScreen = 'lang';
+  }
+
+  document.querySelectorAll('[data-lang-choice]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyLang(btn.dataset.langChoice);
+      enterMenu();
+    });
   });
 
-  // Idioma inicial: localStorage > navegador > es
-  let savedLang = null;
-  try { savedLang = localStorage.getItem('guia14a.lang'); } catch (_) {}
-  const browserLang = (navigator.language || 'es').slice(0, 2);
-  applyLang(savedLang || (I18N[browserLang] ? browserLang : 'es'));
+  document.getElementById('btn-back-to-lang')?.addEventListener('click', backToLang);
+
+  // Splash: el logo se eleva mientras aparece y, antes de que termine, ya
+  // se va revelando el ornamento dorado (movimiento solapado y continuo,
+  // no por pasos), se mantiene un instante y toda la pantalla se
+  // difumina hacia la elección de idioma.
+  const splashLogo = document.getElementById('splash-logo');
+  const splashOrnament = document.getElementById('splash-ornament');
+  requestAnimationFrame(() => splashLogo?.classList.add('is-visible'));
+  setTimeout(() => splashOrnament?.classList.add('is-visible'), 350);
+  setTimeout(() => revealLang(), 2000);
 })();
