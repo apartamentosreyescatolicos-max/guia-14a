@@ -2,33 +2,33 @@
   if (typeof L === 'undefined') return;
 
   const PLACES = [
-    { cat: "comer-dulce",  emoji: "☕", name: "Café 4 Gatos",                lat: 37.17911, lon: -3.59497, q: "Café 4 Gatos Granada" },
-    { cat: "comer-dulce",  emoji: "☕", name: "La Finca Coffee",             lat: 37.17621, lon: -3.60014, q: "La Finca Coffee Granada" },
-    { cat: "comer-dulce",  emoji: "☕", name: "Minuit",                      lat: 37.17597, lon: -3.59665, q: "Minuit Granada" },
-    { cat: "comer-dulce",  emoji: "☕", name: "Café Bar Gerardo",            lat: 37.17620, lon: -3.59850, q: "Café Bar Gerardo Granada" },
-    { cat: "comer-tapas",  emoji: "🍢", name: "La Trastienda",               lat: 37.17628, lon: -3.59618, q: "La Trastienda Plaza Cuchilleros Granada" },
-    { cat: "comer-tapas",  emoji: "🍢", name: "Bodegas Castañeda",           lat: 37.17683, lon: -3.59699, q: "Bodegas Castañeda Granada" },
-    { cat: "comer-tapas",  emoji: "🍢", name: "Bar Los Diamantes",           lat: 37.17373, lon: -3.59833, q: "Bar Los Diamantes Plaza Nueva Granada" },
-    { cat: "comer-tapas",  emoji: "🍢", name: "Los Manueles",                lat: 37.17568, lon: -3.59986, q: "Los Manueles Granada" },
-    { cat: "comer-vistas", emoji: "🌅", name: "Mirador de Morayma",          lat: 37.18090, lon: -3.58956, q: "Mirador de Morayma Granada" },
-    { cat: "comer-vistas", emoji: "🌅", name: "Carmen de Aben Humeya",       lat: 37.18079, lon: -3.59166, q: "Carmen de Aben Humeya Granada" },
+    { cat: "comer-dulce",  emoji: "☕", name: "Café 4 Gatos",                lat: 37.179132, lon: -3.5949983, q: "Café 4 Gatos", pid: "ChIJv-DLZsf8cQ0RzJxLlLFa09g" },
+    { cat: "comer-dulce",  emoji: "☕", name: "La Finca Coffee",             lat: 37.1762041, lon: -3.600124, q: "La Finca Coffee", pid: "ChIJcyOEtr_8cQ0Rf3-n3Wgwuec" },
+    { cat: "comer-dulce",  emoji: "☕", name: "Minuit",                      lat: 37.1759224, lon: -3.5966236, q: "Minuit Pan y Café", pid: "ChIJjVkF5q79cQ0R0rqY2m65VVk" },
+    { cat: "comer-dulce",  emoji: "☕", name: "Café Bar Gerardo",            lat: 37.1804518, lon: -3.5997546, q: "Café-Bar Gerardo", pid: "ChIJwYPIy-cBthIRoeRQWHzwvOE" },
+    { cat: "comer-tapas",  emoji: "🍢", name: "La Trastienda",               lat: 37.1762886, lon: -3.5961407, q: "La Trastienda", pid: "ChIJI2r007j8cQ0RhZXA6RxSOrU" },
+    { cat: "comer-tapas",  emoji: "🍢", name: "Bodegas Castañeda",           lat: 37.1768636, lon: -3.5969901, q: "Bodegas Castañeda", pid: "ChIJLTqlF7_8cQ0RHosavBRI48Q" },
+    { cat: "comer-tapas",  emoji: "🍢", name: "Bar Los Diamantes",           lat: 37.1766076, lon: -3.5959423, q: "Bar Los Diamantes", pid: "ChIJ45mdhb78cQ0R3qfxRyTkzgI" },
+    { cat: "comer-tapas",  emoji: "🍢", name: "Los Manueles",                lat: 37.1765475, lon: -3.6000767, q: "Los Manueles", pid: "ChIJ5yIDoiP9cQ0Rv_Sc8sZRX0k" },
+    { cat: "comer-vistas", emoji: "🌅", name: "Mirador de Morayma",          lat: 37.1807553, lon: -3.5895934, q: "Restaurante Mirador de Morayma", pid: "ChIJaxLMWsj8cQ0R3SyhmNoy0p4" },
+    { cat: "comer-vistas", emoji: "🌅", name: "Carmen de Aben Humeya",       lat: 37.1806799, lon: -3.5917093, q: "Restaurante Carmen de Aben Humeya", pid: "ChIJBURo1sf8cQ0ReAwRLLioo78" },
     { cat: "comer-vistas", emoji: "🌅", name: "La Sabika",                   lat: 37.17347, lon: -3.58939, q: "Restaurante La Sabika Granada" },
-    { cat: "comer-vistas", emoji: "🌅", name: "María de la O",               lat: 37.17883, lon: -3.59687, q: "María de la O Albaicín Granada" },
-    { cat: "ver-mon",      emoji: "🏛️", name: "La Alhambra y el Generalife", lat: 37.17605, lon: -3.58811, q: "Alhambra Granada" },
-    { cat: "ver-mon",      emoji: "🏛️", name: "Albaicín",                    lat: 37.18157, lon: -3.59467, q: "Albaicín Granada" },
-    { cat: "ver-mon",      emoji: "🏛️", name: "Catedral de Granada",         lat: 37.17646, lon: -3.59931, q: "Catedral de Granada" },
-    { cat: "ver-mon",      emoji: "🏛️", name: "Capilla Real",                lat: 37.17620, lon: -3.59878, q: "Capilla Real Granada" },
-    { cat: "ver-mon",      emoji: "🏛️", name: "Sacromonte",                  lat: 37.18187, lon: -3.58499, q: "Sacromonte Granada" },
-    { cat: "ver-mir",      emoji: "🌄", name: "Mirador de San Nicolás",      lat: 37.18104, lon: -3.59266, q: "Mirador de San Nicolás Granada" },
-    { cat: "ver-mir",      emoji: "🌄", name: "Mirador de San Cristóbal",    lat: 37.18369, lon: -3.59582, q: "Mirador de San Cristóbal Granada" },
-    { cat: "ver-mir",      emoji: "🌄", name: "Paseo de los Tristes",        lat: 37.17896, lon: -3.58969, q: "Paseo de los Tristes Granada" },
-    { cat: "ver-mir",      emoji: "🌄", name: "Mirador de los Carvajales",   lat: 37.17893, lon: -3.59425, q: "Mirador de los Carvajales Granada" },
-    { cat: "ver-mus",      emoji: "🎨", name: "Museo Casa de los Tiros",     lat: 37.17475, lon: -3.59553, q: "Casa de los Tiros Granada" },
-    { cat: "ver-mus",      emoji: "🎨", name: "Parque de las Ciencias",      lat: 37.16270, lon: -3.60576, q: "Parque de las Ciencias Granada" },
-    { cat: "ver-mus",      emoji: "🎨", name: "Bellas Artes",                lat: 37.17677, lon: -3.59020, q: "Museo Bellas Artes Palacio Carlos V Granada" },
-    { cat: "souvenirs",    emoji: "🛍️", name: "Artesanías Medina · Reyes Católicos", lat: 37.17633, lon: -3.59644, q: "Artesanías Medina Calle Reyes Católicos 54 Granada" },
-    { cat: "souvenirs",    emoji: "🛍️", name: "Artesanías Medina · Bib-Rambla",      lat: 37.17526, lon: -3.59947, q: "Artesanías Medina Plaza Bib-Rambla Granada" },
-    { cat: "souvenirs",    emoji: "🛍️", name: "Artesanías Medina · Bib-Rambla 2",    lat: 37.17518, lon: -3.59980, q: "Artesanías Medina Plaza Bib-Rambla Granada" },
+    { cat: "comer-vistas", emoji: "🌅", name: "María de la O",               lat: 37.1671632, lon: -3.5867576, q: "Maria de la O Restaurante", pid: "ChIJK95UDK78cQ0RY4COnywCqFI" },
+    { cat: "ver-mon",      emoji: "🏛️", name: "La Alhambra y el Generalife", lat: 37.1760783, lon: -3.5881413, q: "Alhambra", pid: "ChIJO7l_l7f8cQ0Rf6IhEu_RjYA" },
+    { cat: "ver-mon",      emoji: "🏛️", name: "Albaicín",                    lat: 37.18157, lon: -3.59467, q: "Albaicín, Granada", pid: "ChIJkwiHYivjcQ0RXCr0yqO8UYo" },
+    { cat: "ver-mon",      emoji: "🏛️", name: "Catedral de Granada",         lat: 37.1765906, lon: -3.5990649, q: "Catedral de Granada", pid: "ChIJqWuDsb_8cQ0RwlE55Uv7_nA" },
+    { cat: "ver-mon",      emoji: "🏛️", name: "Capilla Real",                lat: 37.1763713, lon: -3.5986063, q: "Capilla Real de Granada", pid: "ChIJJT_b_778cQ0RmwUjKxl7yWM" },
+    { cat: "ver-mon",      emoji: "🏛️", name: "Sacromonte",                  lat: 37.1820683, lon: -3.5864207, q: "Sacromonte, Granada", pid: "ChIJncBP8zHjcQ0RuU8rNjj8q2g" },
+    { cat: "ver-mir",      emoji: "🌄", name: "Mirador de San Nicolás",      lat: 37.1811058, lon: -3.5926637, q: "Mirador de San Nicolás", pid: "ChIJlc_oycf8cQ0RmGSbIT5svlk" },
+    { cat: "ver-mir",      emoji: "🌄", name: "Mirador de San Cristóbal",    lat: 37.1831024, lon: -3.5959984, q: "Mirador de San Cristóbal", pid: "ChIJOzD_sMb8cQ0RlXsnGGQJ3Gk" },
+    { cat: "ver-mir",      emoji: "🌄", name: "Paseo de los Tristes",        lat: 37.1791997, lon: -3.5887713, q: "Paseo de los Tristes", pid: "ChIJg1h_LMj8cQ0RGf1o4IWHExU" },
+    { cat: "ver-mir",      emoji: "🌄", name: "Mirador de los Carvajales",   lat: 37.178979, lon: -3.5942253, q: "Mirador Placeta de Carvajales", pid: "ChIJ00Spfsf8cQ0RTJBosFE3KC8" },
+    { cat: "ver-mus",      emoji: "🎨", name: "Museo Casa de los Tiros",     lat: 37.1747592, lon: -3.5955111, q: "Museo Casa de los Tiros", pid: "ChIJu2j7Lbn8cQ0Ri5SbfkjUYfc" },
+    { cat: "ver-mus",      emoji: "🎨", name: "Parque de las Ciencias",      lat: 37.1624608, lon: -3.6068027, q: "Parque de las Ciencias", pid: "ChIJY1N6W578cQ0RlUdw_5yVKic" },
+    { cat: "ver-mus",      emoji: "🎨", name: "Bellas Artes",                lat: 37.1769402, lon: -3.5899778, q: "Museo de Bellas Artes de Granada", pid: "ChIJY5NBpbf8cQ0Rrf4epNmvb8E" },
+    { cat: "souvenirs",    emoji: "🛍️", name: "Artesanías Medina · Reyes Católicos", lat: 37.17635, lon: -3.5964257, q: "Artesanías Medina, Reyes Católicos 54", pid: "ChIJUzQHqen8cQ0ReYO044JFyAY" },
+    { cat: "souvenirs",    emoji: "🛍️", name: "Artesanías Medina · Bib-Rambla",      lat: 37.1754484, lon: -3.5995354, q: "Artesanías Medina, Plaza de Bib-Rambla 18", pid: "ChIJ1WXtTdn9cQ0RfQD79v8-xqk" },
+    { cat: "souvenirs",    emoji: "🛍️", name: "Artesanías Medina · Bib-Rambla 2",    lat: 37.1755071, lon: -3.6002631, q: "Artesanías Medina, Plaza de Bib-Rambla 14", pid: "ChIJq6fv-b78cQ0RzVsloL-CaDI" },
   ];
 
   const COLORS = {
@@ -66,7 +66,7 @@
       popupAnchor: [0, -16],
     });
     const marker = L.marker([p.lat, p.lon], { icon });
-    const url = 'https://maps.google.com/?q=' + encodeURIComponent(p.q);
+    const url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.q) + (p.pid ? '&query_place_id=' + p.pid : '');
     marker.bindPopup(
       `<div class="mapa-popup">
          <strong>${p.name}</strong>
@@ -160,12 +160,12 @@
   if (typeof L === 'undefined') return;
 
   const POINTS = [
-    { type: "home",    emoji: "🏠", name: "Tu apartamento · Plaza de Cuchilleros 14", lat: 37.1784, lon: -3.5928, q: "Plaza de Cuchilleros 14 Granada" },
-    { type: "parking", emoji: "🅿️", name: "Parking San Agustín",                      lat: 37.1774, lon: -3.5978, q: "Parking San Agustín Granada" },
-    { type: "parking", emoji: "🅿️", name: "Parking APK2 Puerta Real",                 lat: 37.1733, lon: -3.5978, q: "Parking APK2 Puerta Real Granada" },
-    { type: "parking", emoji: "🅿️", name: "Parking Hermanos Maristas",                lat: 37.1754, lon: -3.6015, q: "Parking Hermanos Maristas Granada" },
-    { type: "parking", emoji: "🅿️", name: "Parking Torres Neptuno",                   lat: 37.1650, lon: -3.6040, q: "Parking Torres Neptuno Granada" },
-    { type: "parking", emoji: "🅿️", name: "Parking San Lázaro · Plaza de Toros",      lat: 37.1830, lon: -3.6100, q: "Parking San Lázaro Plaza de Toros Granada" },
+    { type: "home",    emoji: "🏠", name: "Tu apartamento · Plaza de Cuchilleros 14", lat: 37.1762272, lon: -3.5963708, q: "Plaza de Cuchilleros 14, Granada", pid: "ChIJLeOQ1Lj8cQ0RCRc3MLqn7Ew" },
+    { type: "parking", emoji: "🅿️", name: "Parking San Agustín",                      lat: 37.1778097, lon: -3.5990428, q: "Parking San Agustín", pid: "ChIJUQganb_8cQ0Rn9Q84bcqqPE" },
+    { type: "parking", emoji: "🅿️", name: "Parking APK2 Puerta Real",                 lat: 37.171659, lon: -3.598588, q: "Parking APK2 Puerta Real", pid: "ChIJ_cIXXiv9cQ0Rw6EBpLcqu3c" },
+    { type: "parking", emoji: "🅿️", name: "Parking Hermanos Maristas",                lat: 37.1766074, lon: -3.6052343, q: "Parking HH. Maristas", pid: "ChIJZUrqe5T8cQ0R2eCBdzjAWM0" },
+    { type: "parking", emoji: "🅿️", name: "Parking Torres Neptuno",                   lat: 37.1675127, lon: -3.608774, q: "Parking Torres Neptuno", pid: "ChIJayONeJr8cQ0R2gTT02NCAP0" },
+    { type: "parking", emoji: "🅿️", name: "Parking San Lázaro · Plaza de Toros",      lat: 37.1866765, lon: -3.606559, q: "Parking Indigo Granada San Lázaro", pid: "ChIJoQBv1ej8cQ0Rb7HyfW01xgg" },
   ];
 
   const COLORS = { home: "#B5573E", parking: "#4F6E72" };
@@ -194,7 +194,7 @@
       popupAnchor: [0, -16],
     });
     const marker = L.marker([p.lat, p.lon], { icon }).addTo(map);
-    const url = 'https://maps.google.com/?q=' + encodeURIComponent(p.q);
+    const url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.q) + (p.pid ? '&query_place_id=' + p.pid : '');
     marker.bindPopup(
       `<div class="mapa-popup">
          <strong>${p.name}</strong>
