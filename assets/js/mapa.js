@@ -9,10 +9,9 @@
     { cat: "comer-tapas",  emoji: "🍢", name: "La Trastienda",               lat: 37.1762886, lon: -3.5961407, q: "La Trastienda", pid: "ChIJI2r007j8cQ0RhZXA6RxSOrU" },
     { cat: "comer-tapas",  emoji: "🍢", name: "Bodegas Castañeda",           lat: 37.1768636, lon: -3.5969901, q: "Bodegas Castañeda", pid: "ChIJLTqlF7_8cQ0RHosavBRI48Q" },
     { cat: "comer-tapas",  emoji: "🍢", name: "Bar Los Diamantes",           lat: 37.1766076, lon: -3.5959423, q: "Bar Los Diamantes", pid: "ChIJ45mdhb78cQ0R3qfxRyTkzgI" },
-    { cat: "comer-tapas",  emoji: "🍢", name: "Los Manueles",                lat: 37.1765475, lon: -3.6000767, q: "Los Manueles", pid: "ChIJ5yIDoiP9cQ0Rv_Sc8sZRX0k" },
+    { cat: "comer-tapas",  emoji: "🍢", name: "Los Manueles",                lat: 37.1763525, lon: -3.5968757, q: "Los Manueles Reyes Católicos", pid: "ChIJ-TyL8778cQ0RGwyNKqccDOA" },
     { cat: "comer-vistas", emoji: "🌅", name: "Mirador de Morayma",          lat: 37.1807553, lon: -3.5895934, q: "Restaurante Mirador de Morayma", pid: "ChIJaxLMWsj8cQ0R3SyhmNoy0p4" },
     { cat: "comer-vistas", emoji: "🌅", name: "Carmen de Aben Humeya",       lat: 37.1806799, lon: -3.5917093, q: "Restaurante Carmen de Aben Humeya", pid: "ChIJBURo1sf8cQ0ReAwRLLioo78" },
-    { cat: "comer-vistas", emoji: "🌅", name: "La Sabika",                   lat: 37.17347, lon: -3.58939, q: "Restaurante La Sabika Granada" },
     { cat: "comer-vistas", emoji: "🌅", name: "María de la O",               lat: 37.1671632, lon: -3.5867576, q: "Maria de la O Restaurante", pid: "ChIJK95UDK78cQ0RY4COnywCqFI" },
     { cat: "ver-mon",      emoji: "🏛️", name: "La Alhambra y el Generalife", lat: 37.1760783, lon: -3.5881413, q: "Alhambra", pid: "ChIJO7l_l7f8cQ0Rf6IhEu_RjYA" },
     { cat: "ver-mon",      emoji: "🏛️", name: "Albaicín",                    lat: 37.18157, lon: -3.59467, q: "Albaicín, Granada", pid: "ChIJkwiHYivjcQ0RXCr0yqO8UYo" },
@@ -163,9 +162,8 @@
     { type: "home",    emoji: "🏠", name: "Tu apartamento · Plaza de Cuchilleros 14", lat: 37.1762272, lon: -3.5963708, q: "Plaza de Cuchilleros 14, Granada", pid: "ChIJLeOQ1Lj8cQ0RCRc3MLqn7Ew" },
     { type: "parking", emoji: "🅿️", name: "Parking San Agustín",                      lat: 37.1778097, lon: -3.5990428, q: "Parking San Agustín", pid: "ChIJUQganb_8cQ0Rn9Q84bcqqPE" },
     { type: "parking", emoji: "🅿️", name: "Parking APK2 Puerta Real",                 lat: 37.171659, lon: -3.598588, q: "Parking APK2 Puerta Real", pid: "ChIJ_cIXXiv9cQ0Rw6EBpLcqu3c" },
+    { type: "parking", emoji: "🅿️", name: "Parking San Juan de Dios",                 lat: 37.1799589, lon: -3.6034918, q: "Parking San Juan de Dios", pid: "ChIJVdzo6er8cQ0RzL6-JSnN5kc" },
     { type: "parking", emoji: "🅿️", name: "Parking Hermanos Maristas",                lat: 37.1766074, lon: -3.6052343, q: "Parking HH. Maristas", pid: "ChIJZUrqe5T8cQ0R2eCBdzjAWM0" },
-    { type: "parking", emoji: "🅿️", name: "Parking Torres Neptuno",                   lat: 37.1675127, lon: -3.608774, q: "Parking Torres Neptuno", pid: "ChIJayONeJr8cQ0R2gTT02NCAP0" },
-    { type: "parking", emoji: "🅿️", name: "Parking San Lázaro · Plaza de Toros",      lat: 37.1866765, lon: -3.606559, q: "Parking Indigo Granada San Lázaro", pid: "ChIJoQBv1ej8cQ0Rb7HyfW01xgg" },
   ];
 
   const COLORS = { home: "#B5573E", parking: "#4F6E72" };
