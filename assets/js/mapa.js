@@ -12,7 +12,7 @@
     { cat: "comer-tapas",  emoji: "🍢", name: "Los Manueles",                lat: 37.1763525, lon: -3.5968757, q: "Los Manueles Reyes Católicos", pid: "ChIJ-TyL8778cQ0RGwyNKqccDOA" },
     { cat: "comer-vistas", emoji: "🌅", name: "Mirador de Morayma",          lat: 37.1807553, lon: -3.5895934, q: "Restaurante Mirador de Morayma", pid: "ChIJaxLMWsj8cQ0R3SyhmNoy0p4" },
     { cat: "comer-vistas", emoji: "🌅", name: "Carmen de Aben Humeya",       lat: 37.1806799, lon: -3.5917093, q: "Restaurante Carmen de Aben Humeya", pid: "ChIJBURo1sf8cQ0ReAwRLLioo78" },
-    { cat: "comer-vistas", emoji: "🌅", name: "María de la O",               lat: 37.1671632, lon: -3.5867576, q: "Maria de la O Restaurante", pid: "ChIJK95UDK78cQ0RY4COnywCqFI" },
+    { cat: "comer-vistas", emoji: "🌅", name: "Las Tomasas",                lat: 37.1808216, lon: -3.5911682, q: "Las Tomasas Granada", pid: "ChIJM6rVZcj8cQ0RjjY_sjW6ABU" },
     { cat: "ver-mon",      emoji: "🏛️", name: "La Alhambra y el Generalife", lat: 37.1760783, lon: -3.5881413, q: "Alhambra", pid: "ChIJO7l_l7f8cQ0Rf6IhEu_RjYA" },
     { cat: "ver-mon",      emoji: "🏛️", name: "Albaicín",                    lat: 37.18157, lon: -3.59467, q: "Albaicín, Granada", pid: "ChIJkwiHYivjcQ0RXCr0yqO8UYo" },
     { cat: "ver-mon",      emoji: "🏛️", name: "Catedral de Granada",         lat: 37.1765906, lon: -3.5990649, q: "Catedral de Granada", pid: "ChIJqWuDsb_8cQ0RwlE55Uv7_nA" },
