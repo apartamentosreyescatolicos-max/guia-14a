@@ -2126,3 +2126,6 @@ body.is-wizard {
 @media (prefers-reduced-motion: reduce) {
   .detail-screen { animation: none; }
 }
+
+/* Mapa base OpenStreetMap: tono suavizado para que encaje con la paleta */
+.mapa .leaflet-tile-pane { filter: saturate(0.55) brightness(1.04); }
